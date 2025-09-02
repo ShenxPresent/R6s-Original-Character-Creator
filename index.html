@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>R6 干员模板（台词分组可改名/增删）</title>
+<style>
+  :root{
+    --page-width: 1200px;
+    --dark-bg: #0f1317;
+    --panel: #1b232b;
+    --panel-2: #232d36;
+    --text: #e6e6e6;
+    --muted: #b9c0c7;
+    --border: #2e3a44;
+    --yellow: #ffc107;
+    --link: #7ab7ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--dark-bg);color:var(--text);font:400 16px/1.7 "Noto Sans SC","Segoe UI",Arial,Helvetica,sans-serif}
+  a{color:var(--link);text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* Header */
+  .mw-header{background:#0b0f13;border-bottom:1px solid var(--border)}
+  .mw-header .inner{max-width:var(--page-width);margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:12px}
+  .mw-logo{width:36px;height:36px;border-radius:6px;background:linear-gradient(135deg,#0a0a0a,#2c2c2c);display:grid;place-items:center;color:#fff;font-weight:800}
+  .mw-title{font-size:20px;font-weight:700;color:#d7dde3}
+
+  /* Layout */
+  .mw-body{max-width:var(--page-width);margin:0 auto;padding:24px 18px;display:grid;grid-template-columns:220px 1fr 320px;gap:20px}
+  @media (max-width:1100px){.mw-body{grid-template-columns:1fr}}
+  .leftnav{background:var(--panel);border:1px solid var(--border);border-radius:8px;position:sticky;top:16px;height:max-content}
+  .leftnav h3{margin:0;padding:14px;border-bottom:1px solid var(--border);font-size:15px;letter-spacing:1px;color:#fff}
+  .leftnav ol{list-style:none;margin:0;padding:8px}
+  .leftnav li{padding:8px;border-radius:6px}
+  .leftnav li a{display:block;color:#d7dde3}
+  .leftnav li:hover{background:var(--panel-2)}
+
+  /* Content */
+  .content{min-width:0}
+  h1{font-size:36px;margin:8px 0 6px}
+  .lead-quote{background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--yellow);padding:14px;border-radius:6px;color:#fff;margin:12px 0}
+  .section{background:var(--panel);border:1px solid var(--border);border-radius:8px;margin:16px 0;overflow:hidden}
+  .section .hd{background:var(--panel-2);padding:12px 16px;border-bottom:1px solid var(--border);font-size:20px;font-weight:800}
+  .section .bd{padding:14px 16px}
+  .section h3{margin:12px 0 8px;font-size:18px}
+  .stat-table{width:100%;border-collapse:collapse}
+  .stat-table th,.stat-table td{border:1px solid var(--border);padding:8px}
+  .stat-table th{background:#1f2933;text-align:left}
+
+  /* Toggle (台词折叠框) */
+  .togglebox{background:var(--panel-2);border:1px solid var(--border);border-radius:6px;margin:10px 0}
+  .togglebox summary{cursor:pointer;padding:8px 12px;font-weight:700;list-style:none}
+  .togglebox summary::-webkit-details-marker{display:none}
+  .togglebox .tcontent{padding:12px}
+
+  /* Infobox (no sticky) */
+  .infobox{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;height:max-content}
+  .ib-header{background:#000;border:1px solid var(--border);border-radius:6px;display:flex;justify-content:center;align-items:center;padding:6px;margin-bottom:8px}
+  .ib-header img{max-width:100%;height:auto;max-height:100px;object-fit:contain}
+  .ib-image{width:100%;background:#10161b;border:1px solid var(--border);border-radius:6px;margin-bottom:10px;display:flex;justify-content:center;align-items:center;padding:6px}
+  .ib-image img{max-width:100%;height:auto;max-height:400px;object-fit:contain;display:block;margin:0 auto}
+  .ribbon{margin-top:8px;background:var(--yellow);color:#000;font-weight:800;text-align:center;padding:6px;border-radius:4px}
+  .ib-row{display:grid;grid-template-columns:32% 1fr;gap:6px;padding:6px 4px;border-bottom:1px solid var(--border)}
+  .ib-row .k{color:#aab3bb}
+
+  /* Control Panel */
+  .panel{
+    position:fixed; right:18px; bottom:18px; width:440px;
+    background:#121820; border:1px solid var(--border); border-radius:10px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35); z-index:9999;
+  }
+  .panel h3{margin:0;padding:12px 14px;border-bottom:1px solid var(--border);font-size:16px}
+  .panel .body{max-height:60vh;overflow:auto;padding:12px 14px}
+  .panel .group{border:1px solid var(--border);border-radius:10px;padding:10px;margin:10px 0;background:#0f141a}
+  .panel .group h4{margin:0 0 8px 0;font-size:14px;color:#cfd8e3}
+  .panel .row{display:grid;grid-template-columns:36% 1fr;gap:8px;margin-bottom:10px;align-items:center}
+  .panel label{font-size:13px;color:#c7d0d8}
+  .panel input[type="text"], .panel textarea, .panel select{
+    width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px;
+    background:#0f141a; color:#e6eef7; font-family:inherit; font-size:14px;
+  }
+  .panel textarea{min-height:74px;resize:vertical}
+  .panel .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .panel button{
+    padding:8px 10px;border:1px solid var(--border);background:#1b2430;color:#e6e6e6;border-radius:6px;cursor:pointer
+  }
+  .panel button.primary{background:#243244;border-color:#384b5e}
+  .mini{display:flex;gap:6px;align-items:center}
+  .mini input{flex:1}
+  .stepper{display:flex;gap:6px}
+  .stepper button{width:36px}
+
+  /* List editor */
+  .list-editor{border:1px solid var(--border);border-radius:8px;padding:8px;margin:8px 0;background:#0f141a}
+  .list-editor h5{margin:0 0 6px 0;font-size:13px;color:#cfd8e3}
+  .list-editor .item{display:flex;gap:6px;margin:6px 0}
+  .list-editor .item input{flex:1}
+  .list-editor .item button{padding:6px 10px}
+  .list-editor .bar{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+
+  /* Lines group editor */
+  .lines-group{border:1px dashed var(--border);border-radius:8px;padding:8px;margin:10px 0;background:#0c1218}
+  .lines-group .top{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+  .lines-group .top input{flex:1}
+</style>
+</head>
+<body>
+<header class="mw-header">
+  <div class="inner">
+    <div class="mw-logo">R6</div>
+    <div class="mw-title">彩虹六号 Wiki（仿制 | 干员模板）</div>
+  </div>
+</header>
+
+<main class="mw-body">
+  <!-- Left nav -->
+  <aside class="leftnav">
+    <h3>目录</h3>
+    <ol>
+      <li><a href="#cfg">1 干员配置</a>
+        <ol>
+          <li><a href="#cfg-gadget">1.1 特殊装备/技能</a>
+            <ol>
+              <li><a href="#cfg-ops">1.1.1 操作方法</a></li>
+              <li><a href="#cfg-details">1.1.2 详细信息</a></li>
+            </ol>
+          </li>
+          <li><a href="#cfg-weapons">1.2 武器</a></li>
+        </ol>
+      </li>
+      <li><a href="#lore">2 背景故事</a>
+        <ol>
+          <li><a href="#lore-bio">2.1 背景</a></li>
+          <li><a href="#lore-psych">2.2 心理状态报告</a></li>
+          <li><a href="#lore-train">2.3 培训经历</a></li>
+          <li><a href="#lore-exp">2.4 相关经验</a></li>
+          <li><a href="#lore-appendix">2.5 附注</a></li>
+        </ol>
+      </li>
+      <li><a href="#lines">3 台词</a></li>
+      <li><a href="#tips">4 游戏攻略</a></li>
+      <li><a href="#trivia">5 轶事</a></li>
+      <li><a href="#changelog">6 改动记录</a></li>
+      <li><a href="#easter">7 彩蛋</a></li>
+      <li><a href="#ref">8 参考资料</a></li>
+      <li><a href="#top">回到顶部</a></li>
+    </ol>
+  </aside>
+
+  <!-- Main content -->
+  <article class="content" id="top">
+    <h1 data-field="name">Wisteria</h1>
+    <div class="lead-quote" data-field="quote">“听见你的脚步声，也许已经太迟了。”——Léonie "Wisteria" Marchand</div>
+
+    <!-- 1 干员配置 -->
+    <section class="section" id="cfg">
+      <div class="hd">干员配置</div>
+      <div class="bd">
+        <h3 id="cfg-gadget">特殊装备/技能 — <span data-field="gadgetName">SRD-4 “Lamina” 声波干扰器</span></h3>
+        <ul id="gadget-brief">
+          <li data-field="gadgetBrief">设备生效范围：10 米，可自动索敌，但只能手动远程开启；不可取下，可对友军生效。</li>
+        </ul>
+
+        <h4 id="cfg-ops">操作方法</h4>
+        <ul id="ops-list" data-list="ops" data-list-type="ul">
+          <li>按住鼠标中键能够握持，松开鼠标中键即可投出。</li>
+        </ul>
+
+        <h4 id="cfg-details">详细信息</h4>
+        <ul id="detail-list" data-list="details" data-list-type="ul">
+          <li>任何直接伤害方式可以摧毁装置；</li>
+          <li>信号干扰器可以阻断装置信号，使其无法运行；</li>
+          <li>电击接线和蜘蛛电爪将加固墙通电的时候可以摧毁附着的装置；</li>
+        </ul>
+
+        <h3 id="cfg-weapons">武器</h3>
+        <table class="stat-table">
+          <thead><tr><th>类别</th><th>可选装备</th></tr></thead>
+          <tbody>
+            <tr><td>主武器</td><td data-field="weaponPrimary">F2（突击步枪） / SG-CQB（霰弹枪）</td></tr>
+            <tr><td>副武器</td><td data-field="weaponSecondary">P9（手枪） / BEARING 9（自动手枪）</td></tr>
+            <tr><td>次要装备</td><td data-field="gadgetSecondary">手雷 ×2 / 硬突破炸药 ×2</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2 背景故事 -->
+    <section class="section" id="lore">
+      <div class="hd">背景故事</div>
+      <div class="bd">
+        <h3 id="lore-bio">背景</h3>
+        <p data-field="bioP1">Marchand 出生于法国图尔市。母亲是音乐学院教授，父亲则是法国宪兵的声学顾问……</p>
+        <p data-field="bioP2">在巴黎综合理工学院攻读硕士期间，她参与了地铁声学改良项目……</p>
+        <p data-field="bioP3">地铁恐袭后，她决心将研究投入反恐，SRD-4 雏形由此诞生……</p>
+
+        <h3 id="lore-psych">心理状态报告</h3>
+        <p data-field="psychP1">（评估人：Harishva “Harry” Pandey 博士）她对声音的敏感度超乎常人，决策冷静。</p>
+        <p data-field="psychP2">她偏好非致命性压制以赢得时间，与强攻派偶有分歧。</p>
+        <p data-field="psychP3">与 Mira、Lion 的协作提升了设备稳定性与标记能力。</p>
+
+        <h3 id="lore-train">培训经历</h3>
+        <ul id="train-list" data-list="train" data-list-type="ul">
+          <li>巴黎综合理工学院：声学工程与信号处理硕士</li>
+          <li>GIGN：非致命战术装备研发顾问</li>
+          <li>CEPOL：跨境反恐合作课程</li>
+        </ul>
+
+        <h3 id="lore-exp">相关经验</h3>
+        <ul id="exp-list" data-list="exp" data-list-type="ul">
+          <li>“静潮”港口反走私行动</li>
+          <li>欧洲议会安保部署行动</li>
+          <li>城市反恐演练 “暗回声”</li>
+        </ul>
+
+        <h3 id="lore-appendix">附注（装备评估与改进）</h3>
+        <div id="appendix-list" data-list="appendix" data-list-type="p">
+          <p>（评估人：Jäger）原型存在过热与金属反射问题，我们加入散热模组并做多层滤波校正。</p>
+          <p>（与 Lion 协作）移植 EE-1D 识别算法到声学反馈，命中瞬时短时标记。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 台词 -->
+    <section class="section" id="lines">
+      <div class="hd">台词</div>
+      <div class="bd">
+        <details class="togglebox" open>
+          <summary>多人游戏模式台词（可自定义分组名称与条目）</summary>
+          <div class="tcontent" id="lines-groups"><!-- 动态渲染 --></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- 4-8 其他 -->
+    <section class="section" id="tips">
+      <div class="hd">游戏攻略</div>
+      <div class="bd note" data-field="tips">（占位）</div>
+    </section>
+    <section class="section" id="trivia">
+      <div class="hd">轶事</div>
+      <div class="bd" id="trivia-list">
+        <ul>
+          <li data-field="trivia1">代号“Wisteria”象征缠绕与束缚，呼应持续性声波压制。</li>
+          <li data-field="trivia2">启动提示音是倒放的钢琴和弦——向其音乐家庭致意。</li>
+        </ul>
+      </div>
+    </section>
+    <section class="section" id="changelog">
+      <div class="hd">改动记录</div>
+      <div class="bd note" data-field="changelog">（占位）未来用于记录数值改动与补丁说明。</div>
+    </section>
+    <section class="section" id="easter">
+      <div class="hd">彩蛋</div>
+      <div class="bd note" data-field="easter">（占位）</div>
+    </section>
+    <section class="section" id="ref">
+      <div class="hd">参考资料</div>
+      <div class="bd note" data-field="refs">原创设定；页面结构参考 huijiwiki 板式。</div>
+    </section>
+  </article>
+
+  <!-- Right infobox -->
+  <aside class="infobox">
+    <div class="ib-header"><img data-field="iconURL" src="logo.png" alt="Icon"></div>
+    <div class="ib-image"><img data-field="portraitURL" src="image.png" alt="Portrait"></div>
+    <div class="ribbon" data-field="faction">进攻方</div>
+    <div class="ib-row"><span class="k">代号</span><span data-field="codename"><b>Wisteria</b></span></div>
+    <div class="ib-row"><span class="k">常用称呼</span><span data-field="aka">声波、紫藤</span></div>
+    <div class="ib-row"><span class="k">技能</span><span data-field="gadgetShort">SRD-4 “Lamina” 声波干扰器</span></div>
+    <div class="ib-row"><span class="k">速度</span><span data-field="speed">●●○</span></div>
+    <div class="ib-row"><span class="k">生命值</span><span data-field="hp">●●○ (110)</span></div>
+    <div class="ib-row"><span class="k">难度</span><span data-field="difficulty">●●●</span></div>
+    <div class="ib-row"><span class="k">机构</span><span data-field="unit">GIGN</span></div>
+    <div class="ib-row"><span class="k">编队</span><span data-field="squad">Wolfguard</span></div>
+    <div class="ib-row"><span class="k">姓名</span><span data-field="realname">Léonie Marchand</span></div>
+    <div class="ib-row"><span class="k">性别</span><span data-field="gender">女</span></div>
+    <div class="ib-row"><span class="k">生日</span><span data-field="dob">1992年7月12日</span></div>
+    <div class="ib-row"><span class="k">出生地</span><span data-field="pob">法国 · 图尔</span></div>
+    <div class="ib-row"><span class="k">身高</span><span data-field="height">172 cm</span></div>
+    <div class="ib-row"><span class="k">体重</span><span data-field="weight">65 kg</span></div>
+  </aside>
+</main>
+
+<!-- 控制面板 -->
+<div class="panel" id="panel">
+  <h3>模板控制台</h3>
+  <div class="body">
+
+    <!-- A. 页面头部 -->
+    <div class="group">
+      <h4>A. 页面头部</h4>
+      <div class="row"><label>展示名称</label><input type="text" data-input="name"/></div>
+      <div class="row"><label>语录</label><input type="text" data-input="quote"/></div>
+    </div>
+
+    <!-- B. 干员配置 -->
+    <div class="group">
+      <h4>B. 干员配置</h4>
+      <div class="row"><label>技能名</label><input type="text" data-input="gadgetName"/></div>
+      <div class="row"><label>技能摘要</label><textarea data-input="gadgetBrief"></textarea></div>
+
+      <div class="list-editor" data-list-editor="ops">
+        <h5>操作方法</h5>
+        <div class="items"></div>
+        <div class="bar"><button data-add>增加条目</button><button data-clear>清空</button></div>
+      </div>
+
+      <div class="list-editor" data-list-editor="details">
+        <h5>详细信息</h5>
+        <div class="items"></div>
+        <div class="bar"><button data-add>增加条目</button><button data-clear>清空</button></div>
+      </div>
+
+      <div class="row"><label>主武器</label><input type="text" data-input="weaponPrimary"/></div>
+      <div class="row"><label>副武器</label><input type="text" data-input="weaponSecondary"/></div>
+      <div class="row"><label>次要装备</label><input type="text" data-input="gadgetSecondary"/></div>
+    </div>
+
+    <!-- C. 背景故事 -->
+    <div class="group">
+      <h4>C. 背景故事</h4>
+      <div class="row"><label>背景段落 P1</label><textarea data-input="bioP1"></textarea></div>
+      <div class="row"><label>背景段落 P2</label><textarea data-input="bioP2"></textarea></div>
+      <div class="row"><label>背景段落 P3</label><textarea data-input="bioP3"></textarea></div>
+
+      <div class="row"><label>心理报告 P1</label><textarea data-input="psychP1"></textarea></div>
+      <div class="row"><label>心理报告 P2</label><textarea data-input="psychP2"></textarea></div>
+      <div class="row"><label>心理报告 P3</label><textarea data-input="psychP3"></textarea></div>
+
+      <div class="list-editor" data-list-editor="train">
+        <h5>培训经历</h5>
+        <div class="items"></div>
+        <div class="bar"><button data-add>增加条目</button><button data-clear>清空</button></div>
+      </div>
+
+      <div class="list-editor" data-list-editor="exp">
+        <h5>相关经验</h5>
+        <div class="items"></div>
+        <div class="bar"><button data-add>增加条目</button><button data-clear>清空</button></div>
+      </div>
+
+      <div class="list-editor" data-list-editor="appendix" data-list-type="p">
+        <h5>附注段落</h5>
+        <div class="items"></div>
+        <div class="bar"><button data-add>增加条目</button><button data-clear>清空</button></div>
+      </div>
+    </div>
+
+    <!-- D. 台词 -->
+    <div class="group">
+      <h4>D. 台词</h4>
+      <div id="lines-editors"><!-- 动态构建 --></div>
+      <div class="btns"><button id="addLinesGroup">新增台词分组</button></div>
+    </div>
+
+    <!-- E. 其他板块 -->
+    <div class="group">
+      <h4>E. 其他板块</h4>
+      <div class="row"><label>游戏攻略</label><textarea data-input="tips"></textarea></div>
+      <div class="row"><label>轶事 1</label><input type="text" data-input="trivia1"/></div>
+      <div class="row"><label>轶事 2</label><input type="text" data-input="trivia2"/></div>
+      <div class="row"><label>改动记录</label><textarea data-input="changelog"></textarea></div>
+      <div class="row"><label>彩蛋</label><textarea data-input="easter"></textarea></div>
+      <div class="row"><label>参考资料</label><textarea data-input="refs"></textarea></div>
+    </div>
+
+    <!-- F. 右侧栏（信息与图片 + 圆点调节） -->
+    <div class="group">
+      <h4>F. 右侧栏（信息与图片）</h4>
+      <div class="row"><label>图标 URL</label><input type="text" data-input="iconURL" placeholder="logo.png 或 https://..."/></div>
+      <div class="row"><label>立绘 URL</label><input type="text" data-input="portraitURL" placeholder="image.png 或 https://..."/></div>
+      <div class="row"><label>阵营</label><select data-input="faction"><option>进攻方</option><option>防守方</option></select></div>
+      <div class="row"><label>代号</label><input type="text" data-input="codename"/></div>
+      <div class="row"><label>别称</label><input type="text" data-input="aka"/></div>
+      <div class="row"><label>右栏技能行</label><input type="text" data-input="gadgetShort"/></div>
+
+      <div class="row">
+        <label>速度</label>
+        <div class="mini">
+          <input type="text" data-input="speed" placeholder="●●○"/>
+          <div class="stepper">
+            <button type="button" data-step="speed" data-delta="-1">−</button>
+            <button type="button" data-step="speed" data-delta="1">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>生命值</label>
+        <div class="mini">
+          <input type="text" data-input="hp" placeholder="●●○ (110)"/>
+          <div class="stepper">
+            <button type="button" data-step="hp" data-delta="-1">−</button>
+            <button type="button" data-step="hp" data-delta="1">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>难度</label>
+        <div class="mini">
+          <input type="text" data-input="difficulty" placeholder="●●●"/>
+          <div class="stepper">
+            <button type="button" data-step="difficulty" data-delta="-1">−</button>
+            <button type="button" data-step="difficulty" data-delta="1">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="row"><label>机构</label><input type="text" data-input="unit"/></div>
+      <div class="row"><label>编队</label><input type="text" data-input="squad"/></div>
+      <div class="row"><label>姓名</label><input type="text" data-input="realname"/></div>
+      <div class="row"><label>性别</label><input type="text" data-input="gender"/></div>
+      <div class="row"><label>生日</label><input type="text" data-input="dob"/></div>
+      <div class="row"><label>出生地</label><input type="text" data-input="pob"/></div>
+      <div class="row"><label>身高</label><input type="text" data-input="height"/></div>
+      <div class="row"><label>体重</label><input type="text" data-input="weight"/></div>
+    </div>
+
+    <div class="btns">
+      <button class="primary" id="toggleEdit">整页可编辑：关</button>
+      <button id="exportBtn">导出 JSON</button>
+      <button id="importBtn">导入 JSON</button>
+      <input id="fileInput" type="file" accept="application/json" style="display:none"/>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== 工具：圆点渲染与解析 ===== */
+function renderDots(n){ n=Math.max(1,Math.min(3,Number(n)||1)); return '●'.repeat(n)+'○'.repeat(3-n); }
+function parseDots(s){ const m=(s||'').match(/●/g); return Math.min(3,Math.max(1,(m?m.length:1))); }
+const HP_TABLE={1:100,2:110,3:125};
+
+/* ===== 文本字段：data-field ↔ data-input ===== */
+const fields=[...document.querySelectorAll('[data-field]')];
+const inputs=[...document.querySelectorAll('[data-input]')];
+
+function getTextState(){
+  const state={};
+  fields.forEach(el=>state[el.dataset.field]=el.tagName==='IMG'?el.src:el.innerHTML);
+  return state;
+}
+function setTextState(state){
+  fields.forEach(el=>{
+    const k=el.dataset.field;
+    if(state[k]!==undefined){ if(el.tagName==='IMG'){el.src=state[k];} else {el.innerHTML=state[k];} }
+  });
+  inputs.forEach(inp=>{ const k=inp.dataset.input; if(state[k]!==undefined) inp.value=state[k]; });
+}
+function bindInputs(){
+  inputs.forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const k=inp.dataset.input;
+      const t=document.querySelector('[data-field="'+k+'"]');
+      if(!t) return;
+      if(t.tagName==='IMG'){ t.src=inp.value; }
+      else { t.innerHTML=inp.value; }
+    });
+  });
+}
+
+/* ===== 列表：DOM ↔ state.lists（ul 或 p 容器） ===== */
+function readListFromDOM(key){
+  const box=document.querySelector('[data-list="'+key+'"]');
+  if(!box) return [];
+  const type=box.dataset.listType||'ul';
+  if(type==='p'){ return [...box.querySelectorAll('p')].map(p=>p.textContent.trim()).filter(Boolean); }
+  return [...box.querySelectorAll('li')].map(li=>li.textContent.trim()).filter(Boolean);
+}
+function renderListToDOM(key,arr){
+  const box=document.querySelector('[data-list="'+key+'"]');
+  if(!box) return;
+  const type=box.dataset.listType||'ul';
+  box.innerHTML='';
+  (arr||[]).forEach(txt=>{
+    if(type==='p'){ const p=document.createElement('p'); p.textContent=txt; box.appendChild(p); }
+    else { const li=document.createElement('li'); li.textContent=txt; box.appendChild(li); }
+  });
+}
+
+/* ===== 列表编辑器组件（与正文联动） ===== */
+function buildListEditor(key){
+  const editor=document.querySelector('[data-list-editor="'+key+'"]');
+  if(!editor) return;
+  const itemsBox=editor.querySelector('.items');
+  const addBtn=editor.querySelector('[data-add]');
+  const clearBtn=editor.querySelector('[data-clear]');
+
+  function refresh(){
+    itemsBox.innerHTML='';
+    const data=readListFromDOM(key);
+    data.forEach((txt,idx)=>{
+      const wrap=document.createElement('div'); wrap.className='item';
+      const inp=document.createElement('input'); inp.type='text'; inp.value=txt;
+      const del=document.createElement('button'); del.textContent='删除';
+      del.addEventListener('click', ()=>{
+        const arr=readListFromDOM(key); arr.splice(idx,1);
+        renderListToDOM(key,arr); refresh();
+      });
+      inp.addEventListener('input', ()=>{
+        const arr=readListFromDOM(key); arr[idx]=inp.value;
+        renderListToDOM(key,arr);
+      });
+      wrap.appendChild(inp); wrap.appendChild(del);
+      itemsBox.appendChild(wrap);
+    });
+  }
+
+  addBtn.addEventListener('click', ()=>{
+    const arr=readListFromDOM(key); arr.push('新条目…');
+    renderListToDOM(key,arr); refresh();
+  });
+  clearBtn.addEventListener('click', ()=>{
+    renderListToDOM(key,[]); refresh();
+  });
+
+  refresh();
+}
+
+/* ===== 台词：分组状态 + DOM/编辑器 渲染 ===== */
+let linesState = [
+  { title:'行动开始', items:[
+    '"Stay quiet, let them walk into my net."（安静点，让他们自己踏入陷阱。）',
+    '"Sound will guide me."（声音会指引我。）',
+    '"Every echo tells a story."（每一道回声都有故事。）'
+  ]},
+  { title:'部署 SRD-4 “Lamina”', items:[
+    '"Lamina armed, let’s rattle their nerves."（Lamina 已部署，让他们心神不宁。）',
+    '"Setting the wall to sing."（让墙开口歌唱。）',
+    '"Resonance is ready."（共振已就绪。）'
+  ]},
+  { title:'装置触发 / 敌人被震晕', items:[
+    '"They heard it too late."（他们听到的时候已经太迟了。）',
+    '"Caught in the pulse."（被脉冲抓住了。）',
+    '"You can’t run from the sound."（你逃不出声波。）'
+  ]},
+  { title:'命中敌人并标记', items:[
+    '"Target marked, finish it."（目标已标记，解决掉。）',
+    '"Resonance found you."（共振找到你了。）',
+    '"Nowhere to hide."（无处可藏。）'
+  ]}
+];
+
+function renderLinesDOM(){
+  const host=document.getElementById('lines-groups');
+  host.innerHTML='';
+  linesState.forEach(group=>{
+    const h4=document.createElement('h4'); h4.textContent=group.title;
+    const ul=document.createElement('ul');
+    group.items.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+    host.appendChild(h4); host.appendChild(ul);
+  });
+}
+
+function buildLinesEditors(){
+  const box=document.getElementById('lines-editors');
+  box.innerHTML='';
+  linesState.forEach((group, idx)=>{
+    const wrap=document.createElement('div'); wrap.className='lines-group';
+
+    // 顶部：标题输入 + 删除按钮
+    const top=document.createElement('div'); top.className='top';
+    const titleInp=document.createElement('input'); titleInp.type='text'; titleInp.value=group.title;
+    const delBtn=document.createElement('button'); delBtn.textContent='删除分组';
+    delBtn.addEventListener('click', ()=>{
+      linesState.splice(idx,1);
+      renderLinesDOM(); buildLinesEditors();
+    });
+    titleInp.addEventListener('input', ()=>{
+      linesState[idx].title = titleInp.value;
+      renderLinesDOM();
+    });
+    top.appendChild(titleInp); top.appendChild(delBtn);
+    wrap.appendChild(top);
+
+    // 条目列表编辑器（复用简易组件）
+    const editor=document.createElement('div'); editor.className='list-editor';
+    const h5=document.createElement('h5'); h5.textContent='条目';
+    const itemsBox=document.createElement('div'); itemsBox.className='items';
+    const bar=document.createElement('div'); bar.className='bar';
+    const add=document.createElement('button'); add.textContent='增加条目';
+    const clr=document.createElement('button'); clr.textContent='清空';
+
+    function refreshItems(){
+      itemsBox.innerHTML='';
+      linesState[idx].items.forEach((txt,i)=>{
+        const row=document.createElement('div'); row.className='item';
+        const inp=document.createElement('input'); inp.type='text'; inp.value=txt;
+        const rm=document.createElement('button'); rm.textContent='删除';
+        rm.addEventListener('click', ()=>{
+          linesState[idx].items.splice(i,1);
+          renderLinesDOM(); refreshItems();
+        });
+        inp.addEventListener('input', ()=>{
+          linesState[idx].items[i]=inp.value;
+          renderLinesDOM();
+        });
+        row.appendChild(inp); row.appendChild(rm);
+        itemsBox.appendChild(row);
+      });
+    }
+    add.addEventListener('click', ()=>{
+      linesState[idx].items.push('新台词…');
+      renderLinesDOM(); refreshItems();
+    });
+    clr.addEventListener('click', ()=>{
+      linesState[idx].items = [];
+      renderLinesDOM(); refreshItems();
+    });
+
+    bar.appendChild(add); bar.appendChild(clr);
+    editor.appendChild(h5); editor.appendChild(itemsBox); editor.appendChild(bar);
+    wrap.appendChild(editor);
+
+    box.appendChild(wrap);
+    refreshItems();
+  });
+}
+
+document.getElementById('addLinesGroup').addEventListener('click', ()=>{
+  linesState.push({title:'新分组', items:['新台词…']});
+  renderLinesDOM(); buildLinesEditors();
+});
+
+/* ===== 导出 / 导入 ===== */
+function getFullState(){
+  const texts=getTextState();
+  const lists={
+    ops:readListFromDOM('ops'),
+    details:readListFromDOM('details'),
+    train:readListFromDOM('train'),
+    exp:readListFromDOM('exp'),
+    appendix:readListFromDOM('appendix'),
+  };
+  return {texts, lists, lines: linesState};
+}
+function setFullState(state){
+  if(state.texts) setTextState(state.texts);
+  if(state.lists){
+    Object.keys(state.lists).forEach(k=>renderListToDOM(k,state.lists[k]));
+  }
+  if(state.lines) { linesState = state.lines; }
+  // 重新构建
+  ['ops','details','train','exp','appendix'].forEach(buildListEditor);
+  renderLinesDOM(); buildLinesEditors();
+}
+
+/* ===== 圆点 + / − 控件 ===== */
+function updateDotsField(which,delta){
+  const input=document.querySelector('[data-input="'+which+'"]');
+  let n=parseDots(input.value);
+  n=Math.max(1,Math.min(3,n+delta));
+  if(which==='hp'){
+    input.value = `${renderDots(n)} (${HP_TABLE[n]})`;
+  }else{
+    input.value = renderDots(n);
+  }
+  const field=document.querySelector('[data-field="'+which+'"]');
+  if(field) field.innerHTML=input.value;
+}
+document.querySelectorAll('[data-step]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const which=btn.getAttribute('data-step');
+    const delta=parseInt(btn.getAttribute('data-delta'),10)||0;
+    updateDotsField(which,delta);
+  });
+});
+
+/* ===== 初始化 ===== */
+(function init(){
+  setTextState(getTextState());
+  bindInputs();
+  ['ops','details','train','exp','appendix'].forEach(buildListEditor);
+  renderLinesDOM(); buildLinesEditors();
+})();
+
+/* ===== 整页 contenteditable 切换 ===== */
+const toggleBtn=document.getElementById('toggleEdit');
+let editable=false;
+toggleBtn.addEventListener('click', ()=>{
+  editable=!editable;
+  document.querySelectorAll('.content, .infobox').forEach(el=>el.setAttribute('contenteditable', editable?'true':'false'));
+  toggleBtn.textContent='整页可编辑：'+(editable?'开':'关');
+});
+
+/* ===== 文件导出/导入 ===== */
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  const data=JSON.stringify(getFullState(),null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url;
+  const codename=document.querySelector('[data-field="codename"]')?.textContent||'operator';
+  a.download=codename+'.json'; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ setFullState(JSON.parse(r.result)); }catch(err){ alert('JSON 解析失败'); } };
+  r.readAsText(f);
+});
+</script>
+</body>
+</html>
