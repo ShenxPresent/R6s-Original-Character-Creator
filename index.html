@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>R6 干员模板（台词分组可改名/增删）</title>
+<title>R6 干员模板</title>
 <style>
   :root{
     --page-width: 1200px;
@@ -67,7 +67,7 @@
 
   /* Control Panel */
   .panel{
-    position:fixed; right:18px; bottom:18px; width:440px;
+    position:fixed; right:18px; bottom:18px; width:460px;
     background:#121820; border:1px solid var(--border); border-radius:10px;
     box-shadow:0 10px 30px rgba(0,0,0,.35); z-index:9999;
   }
@@ -81,6 +81,7 @@
     width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px;
     background:#0f141a; color:#e6eef7; font-family:inherit; font-size:14px;
   }
+  .panel input[type="file"]{color:#c7d0d8}
   .panel textarea{min-height:74px;resize:vertical}
   .panel .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .panel button{
@@ -104,6 +105,15 @@
   .lines-group{border:1px dashed var(--border);border-radius:8px;padding:8px;margin:10px 0;background:#0c1218}
   .lines-group .top{display:flex;gap:8px;align-items:center;margin-bottom:6px}
   .lines-group .top input{flex:1}
+
+  /* Print */
+  @media print{
+    body{ background:#fff; }
+    .mw-header, .leftnav, .panel{ display:none!important; }
+    .infobox{ float:right; width:300px; margin-left:16px; }
+    .mw-body{ max-width:1000px; }
+    a[href]:after{ content:""; }
+  }
 </style>
 </head>
 <body>
@@ -152,7 +162,7 @@
   <!-- Main content -->
   <article class="content" id="top">
     <h1 data-field="name">Wisteria</h1>
-    <div class="lead-quote" data-field="quote">“听见你的脚步声，也许已经太迟了。”——Léonie "Wisteria" Marchand</div>
+    <div class="lead-quote" data-field="quote">“钢筋混凝土会屏蔽很多东西——但不包括共振。”——Léonie "Wisteria" Marchand</div>
 
     <!-- 1 干员配置 -->
     <section class="section" id="cfg">
@@ -215,7 +225,7 @@
           <li>城市反恐演练 “暗回声”</li>
         </ul>
 
-        <h3 id="lore-appendix">附注（装备评估与改进）</h3>
+        <h3 id="lore-appendix">附注</h3>
         <div id="appendix-list" data-list="appendix" data-list-type="p">
           <p>（评估人：Jäger）原型存在过热与金属反射问题，我们加入散热模组并做多层滤波校正。</p>
           <p>（与 Lion 协作）移植 EE-1D 识别算法到声学反馈，命中瞬时短时标记。</p>
@@ -228,8 +238,8 @@
       <div class="hd">台词</div>
       <div class="bd">
         <details class="togglebox" open>
-          <summary>多人游戏模式台词（可自定义分组名称与条目）</summary>
-          <div class="tcontent" id="lines-groups"><!-- 动态渲染 --></div>
+          <summary>多人游戏模式台词</summary>
+          <div class="tcontent" id="lines-groups"></div>
         </details>
       </div>
     </section>
@@ -264,8 +274,8 @@
 
   <!-- Right infobox -->
   <aside class="infobox">
-    <div class="ib-header"><img data-field="iconURL" src="logo.png" alt="Icon"></div>
-    <div class="ib-image"><img data-field="portraitURL" src="image.png" alt="Portrait"></div>
+    <div class="ib-header"><img data-field="iconURL" src="logo.png" alt="Icon" crossorigin="anonymous"></div>
+    <div class="ib-image"><img data-field="portraitURL" src="image.png" alt="Portrait" crossorigin="anonymous"></div>
     <div class="ribbon" data-field="faction">进攻方</div>
     <div class="ib-row"><span class="k">代号</span><span data-field="codename"><b>Wisteria</b></span></div>
     <div class="ib-row"><span class="k">常用称呼</span><span data-field="aka">声波、紫藤</span></div>
@@ -349,10 +359,10 @@
       </div>
     </div>
 
-    <!-- D. 台词 -->
+    <!-- D. 台词（分组可改名/增删） -->
     <div class="group">
       <h4>D. 台词</h4>
-      <div id="lines-editors"><!-- 动态构建 --></div>
+      <div id="lines-editors"></div>
       <div class="btns"><button id="addLinesGroup">新增台词分组</button></div>
     </div>
 
@@ -367,11 +377,13 @@
       <div class="row"><label>参考资料</label><textarea data-input="refs"></textarea></div>
     </div>
 
-    <!-- F. 右侧栏（信息与图片 + 圆点调节） -->
+    <!-- F. 右侧栏（信息与图片 + 圆点调节 + 本地图上传） -->
     <div class="group">
-      <h4>F. 右侧栏（信息与图片）</h4>
-      <div class="row"><label>图标 URL</label><input type="text" data-input="iconURL" placeholder="logo.png 或 https://..."/></div>
-      <div class="row"><label>立绘 URL</label><input type="text" data-input="portraitURL" placeholder="image.png 或 https://..."/></div>
+      <h4>F. 右侧栏</h4>
+      <div class="row"><label>图标 URL / dataURL</label><input type="text" data-input="iconURL" placeholder="logo.png 或 data:image/..."/></div>
+      <div class="row"><label>上传图标</label><input type="file" id="iconUpload" accept="image/*"></div>
+      <div class="row"><label>立绘 URL / dataURL</label><input type="text" data-input="portraitURL" placeholder="image.png 或 data:image/..."/></div>
+      <div class="row"><label>上传立绘</label><input type="file" id="portraitUpload" accept="image/*"></div>
       <div class="row"><label>阵营</label><select data-input="faction"><option>进攻方</option><option>防守方</option></select></div>
       <div class="row"><label>代号</label><input type="text" data-input="codename"/></div>
       <div class="row"><label>别称</label><input type="text" data-input="aka"/></div>
@@ -391,7 +403,7 @@
       <div class="row">
         <label>生命值</label>
         <div class="mini">
-          <input type="text" data-input="hp" placeholder="●●○ (110)"/>
+          <input type="text" data-input="hp" placeholder="●○○ (100) / ●●○ (110) / ●●● (125)"/>
           <div class="stepper">
             <button type="button" data-step="hp" data-delta="-1">−</button>
             <button type="button" data-step="hp" data-delta="1">+</button>
@@ -424,10 +436,15 @@
       <button class="primary" id="toggleEdit">整页可编辑：关</button>
       <button id="exportBtn">导出 JSON</button>
       <button id="importBtn">导入 JSON</button>
+      <button id="exportPDFBtn">导出 PDF</button>
+      <button id="exportPNGBtn">导出 PNG</button>
       <input id="fileInput" type="file" accept="application/json" style="display:none"/>
     </div>
   </div>
 </div>
+
+<!-- html2canvas 用于 PNG 导出 -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
 /* ===== 工具：圆点渲染与解析 ===== */
@@ -486,6 +503,7 @@ function renderListToDOM(key,arr){
 function buildListEditor(key){
   const editor=document.querySelector('[data-list-editor="'+key+'"]');
   if(!editor) return;
+  const type = editor.dataset.listType || 'ul';
   const itemsBox=editor.querySelector('.items');
   const addBtn=editor.querySelector('[data-add]');
   const clearBtn=editor.querySelector('[data-clear]');
@@ -511,7 +529,7 @@ function buildListEditor(key){
   }
 
   addBtn.addEventListener('click', ()=>{
-    const arr=readListFromDOM(key); arr.push('新条目…');
+    const arr=readListFromDOM(key); arr.push(type==='p'?'新段落…':'新条目…');
     renderListToDOM(key,arr); refresh();
   });
   clearBtn.addEventListener('click', ()=>{
@@ -577,7 +595,7 @@ function buildLinesEditors(){
     top.appendChild(titleInp); top.appendChild(delBtn);
     wrap.appendChild(top);
 
-    // 条目列表编辑器（复用简易组件）
+    // 条目列表编辑器
     const editor=document.createElement('div'); editor.className='list-editor';
     const h5=document.createElement('h5'); h5.textContent='条目';
     const itemsBox=document.createElement('div'); itemsBox.className='items';
@@ -644,7 +662,6 @@ function setFullState(state){
     Object.keys(state.lists).forEach(k=>renderListToDOM(k,state.lists[k]));
   }
   if(state.lines) { linesState = state.lines; }
-  // 重新构建
   ['ops','details','train','exp','appendix'].forEach(buildListEditor);
   renderLinesDOM(); buildLinesEditors();
 }
@@ -670,12 +687,31 @@ document.querySelectorAll('[data-step]').forEach(btn=>{
   });
 });
 
+/* ===== 图片上传为 dataURL（避免 CORS/本地 file:// 问题） ===== */
+function bindImageUploader(inputId, fieldKey){
+  const inp = document.getElementById(inputId);
+  if(!inp) return;
+  inp.addEventListener('change', e=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    const fr = new FileReader();
+    fr.onload = ()=>{
+      const input = document.querySelector('[data-input="'+fieldKey+'"]');
+      if(input) input.value = fr.result;    // 保存到输入框
+      const img = document.querySelector('[data-field="'+fieldKey+'"]');
+      if(img && img.tagName === 'IMG') img.src = fr.result; // 替换右栏图片
+    };
+    fr.readAsDataURL(f);
+  });
+}
+
 /* ===== 初始化 ===== */
 (function init(){
   setTextState(getTextState());
   bindInputs();
   ['ops','details','train','exp','appendix'].forEach(buildListEditor);
   renderLinesDOM(); buildLinesEditors();
+  bindImageUploader('iconUpload','iconURL');
+  bindImageUploader('portraitUpload','portraitURL');
 })();
 
 /* ===== 整页 contenteditable 切换 ===== */
@@ -703,6 +739,88 @@ document.getElementById('fileInput').addEventListener('change', e=>{
   const r=new FileReader();
   r.onload=()=>{ try{ setFullState(JSON.parse(r.result)); }catch(err){ alert('JSON 解析失败'); } };
   r.readAsText(f);
+});
+
+/* ===== 导出 PDF / PNG ===== */
+function safeHideForExport(hide=true){
+  const els=[document.querySelector('.panel')];
+  els.forEach(el=>{ if(!el) return; el.dataset.__display = el.style.display || ''; el.style.display = hide ? 'none' : el.dataset.__display; });
+}
+
+/* ——— PNG 导出：自动清理跨域图片，避免 canvas 污染 ——— */
+const TRANSPARENT_PX =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAn8B3o8lqB8AAAAASUVORK5CYII=';
+const isExternal = (url) => {
+  try{
+    const u = new URL(url, location.href);
+    return /^https?:/i.test(u.protocol) && u.origin !== location.origin;
+  }catch{ return false; }
+};
+async function toDataURLViaFetch(url){
+  const res = await fetch(url, { mode: 'cors' });
+  if(!res.ok) throw new Error('fetch failed');
+  const blob = await res.blob();
+  return await new Promise((resolve)=>{
+    const fr = new FileReader();
+    fr.onload = ()=>resolve(fr.result);
+    fr.readAsDataURL(blob);
+  });
+}
+async function prepareImagesForExport(target){
+  const imgs = [...target.querySelectorAll('img')];
+  const restores = [];
+  for(const img of imgs){
+    const src = img.currentSrc || img.src;
+    if(!src || src.startsWith('data:') || !isExternal(src)) continue;
+
+    restores.push(()=>{ img.src = src; });
+
+    try{
+      img.setAttribute('crossorigin','anonymous');
+      const dataURL = await toDataURLViaFetch(src);
+      img.src = dataURL;
+    }catch(e){
+      img.src = TRANSPARENT_PX; // 无法跨域时用透明像素兜底
+    }
+  }
+  return ()=>restores.forEach(fn=>fn());
+}
+
+document.getElementById('exportPDFBtn').addEventListener('click', ()=>{
+  safeHideForExport(true);
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>safeHideForExport(false), 300);
+  }, 50);
+});
+
+document.getElementById('exportPNGBtn').addEventListener('click', async ()=>{
+  const target = document.querySelector('.mw-body'); // 仅截主体（含右栏）
+  if(!target){ return alert('未找到导出区域'); }
+  safeHideForExport(true);
+  const restoreImgs = await prepareImagesForExport(target);
+  await new Promise(r=>setTimeout(r,50));
+  try{
+    const canvas = await html2canvas(target, {
+      backgroundColor: '#0f1317',
+      useCORS: true,
+      allowTaint: false,
+      scale: window.devicePixelRatio > 1 ? 2 : 1,
+      logging: false
+    });
+    const png = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    const codename = document.querySelector('[data-field="codename"]')?.textContent?.trim() || 'operator';
+    a.href = png;
+    a.download = codename + '.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  }catch(e){
+    console.error(e);
+    alert('导出 PNG 失败：' + e.message);
+  }finally{
+    restoreImgs();
+    safeHideForExport(false);
+  }
 });
 </script>
 </body>
